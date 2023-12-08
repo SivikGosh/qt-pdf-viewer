@@ -1,12 +1,11 @@
 import sys
 from PyQt5.QtWidgets import QLabel, QFileDialog, QMainWindow, QApplication
-from PyQt5.QtGui import QPixmap
-from PyPDF2 import PdfReader, PdfWriter
 import os
+from PyQt5.QtCore import Qt, QPoint, QRect
 
 from design import Ui_MainWindow
 from pdf2image import convert_from_path
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QColor
 from PIL import Image
 
 
@@ -27,16 +26,16 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
         self.count = 1
 
         file_dir = QFileDialog.getOpenFileName(self, 'Open file', '', "PDF files (*.pdf)")[0]
-        pages_list = []
         pages = convert_from_path(file_dir, size=(800,))
 
         for num, page in enumerate(pages):
             page.save(f'tmp/page_{num+1}.png', 'PNG')
-            pages_list.append(f'page_{num+1}.png')
+            self.page_list.append(f'page_{num+1}.png')
 
-        self.view_page.setPixmap(QPixmap(f'tmp/{pages_list[0]}'))
-        # self.page_count = len(pages_list)
-        self.page_list = pages_list
+        pixmap = QPixmap(f'tmp/{self.page_list[0]}')
+        self.view_page.setPixmap(pixmap)
+        # pix = pixmap.rect().size()
+        self.draw_something(pixmap)
 
     @staticmethod
     def __clear_tmp_folder():
@@ -60,6 +59,24 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
             self.next_page.setEnabled(True)
         if self.count-1 < 1:
             self.prev_page.setEnabled(False)
+
+    def draw_something(self, pix):
+        painter = QPainter(self.view_page.pixmap())
+        painter.drawPixmap(self.rect(), pix)
+        pen = QPen(Qt.red, 3)
+        painter.setPen(pen)
+        painter.drawRect(100, 100, 100, 100)
+        # painter.drawRect(QRect(self.begin, self.end))
+        painter.end()
+
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        pass
+
+    def mouseReleaseEvent(self, event):
+        pass
 
 
 def main():
