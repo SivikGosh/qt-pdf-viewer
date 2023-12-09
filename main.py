@@ -1,11 +1,12 @@
 import sys
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QLabel
 import os
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint, QRect
 
 from design import Ui_MainWindow
 from pdf2image import convert_from_path
-from PyQt5.QtGui import QPixmap, QPainter
+from PyQt5.QtGui import QPixmap, QPainter, QPen
+from pdf2image.exceptions import PDFPageCountError
 
 
 class PDFAppWindow(QMainWindow, Ui_MainWindow):
@@ -17,26 +18,28 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
         self.next_page.clicked.connect(lambda: self.show_next_page(self.page_list))
         self.prev_page.clicked.connect(lambda: self.show_prev_page(self.page_list))
         self.count = 0
-        self.pos1 = [100, 100]
-        self.pos2 = [100, 100]
-        self.view_page.setMouseTracking(True)
+        self.x = None
+        self.y = None
 
     def open_file(self):
-        self.__clear_tmp_folder()
-        self.next_page.setEnabled(True)
-        self.prev_page.setEnabled(False)
-        self.count = 1
+        try:
+            self.__clear_tmp_folder()
+            self.next_page.setEnabled(True)
+            self.prev_page.setEnabled(False)
+            self.count = 1
 
-        file_dir = QFileDialog.getOpenFileName(self, 'Open file', '', "PDF files (*.pdf)")[0]
-        pages = convert_from_path(file_dir, size=(800,))
+            file_dir = QFileDialog.getOpenFileName(self, 'Open file', '', "PDF files (*.pdf)")[0]
+            pages = convert_from_path(file_dir, size=800)
 
-        for num, page in enumerate(pages):
-            page.save(f'tmp/page_{num+1}.png', 'PNG')
-            self.page_list.append(f'page_{num+1}.png')
+            for num, page in enumerate(pages):
+                page.save(f'tmp/page_{num+1}.png', 'PNG')
+                self.page_list.append(f'page_{num+1}.png')
 
-        pixmap = QPixmap(f'tmp/{self.page_list[0]}')
-        self.view_page.setPixmap(pixmap)
-        # self.draw_something(pixmap)
+            pixmap = QPixmap(f'tmp/{self.page_list[0]}')
+            self.view_page.setPixmap(pixmap)
+            self.view_page.setMouseTracking(True)
+        except PDFPageCountError:
+            self.view_page.pixmap()
 
     @staticmethod
     def __clear_tmp_folder():
@@ -61,19 +64,27 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
         if self.count-1 < 1:
             self.prev_page.setEnabled(False)
 
-    def drawPoints(self, pos):
-        print("Call draw points")
-        pen = Qt.QPen(Qt.Qt.black, 10)
-        qp = Qt.QPainter()
-        qp.begin(self.image.pixmap())
+    def mousePressEvent(self, event):
+        pen = QPen(Qt.red, 3)
+        qp = QPainter()
+        qp.begin(self.view_page.pixmap())
         qp.setPen(pen)
-        qp.drawPoint(pos.x(), pos.y())
-        self.image.update()
+        x = int(event.pos().x())
+        y = int(event.pos().y())
+        qp.drawPoint(x, y)
+        self.x = x
+        self.y = y
+        self.view_page.update()
 
-    def get_pos(self, event):
-        X = event.pos().x()
-        y = event.pos().y()
-        self.drawPoints(event.pos())
+    def mouseReleaseEvent(self, event):
+        pen = QPen(Qt.red, 3)
+        qp = QPainter()
+        qp.begin(self.view_page.pixmap())
+        qp.setPen(pen)
+        x = int(event.pos().x())
+        y = int(event.pos().y())
+        qp.drawRect(self.x, self.y, x-self.x, y-self.y)
+        self.view_page.update()
 
 
 def main():
