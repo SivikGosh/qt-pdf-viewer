@@ -1,12 +1,11 @@
 import sys
-from PyQt5.QtWidgets import QLabel, QFileDialog, QMainWindow, QApplication
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QLabel
 import os
-from PyQt5.QtCore import Qt, QPoint, QRect
+from PyQt5.QtCore import Qt
 
 from design import Ui_MainWindow
 from pdf2image import convert_from_path
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QColor
-from PIL import Image
+from PyQt5.QtGui import QPixmap, QPainter
 
 
 class PDFAppWindow(QMainWindow, Ui_MainWindow):
@@ -18,6 +17,9 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
         self.next_page.clicked.connect(lambda: self.show_next_page(self.page_list))
         self.prev_page.clicked.connect(lambda: self.show_prev_page(self.page_list))
         self.count = 0
+        self.pos1 = [100, 100]
+        self.pos2 = [100, 100]
+        self.view_page.setMouseTracking(True)
 
     def open_file(self):
         self.__clear_tmp_folder()
@@ -34,8 +36,7 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
 
         pixmap = QPixmap(f'tmp/{self.page_list[0]}')
         self.view_page.setPixmap(pixmap)
-        # pix = pixmap.rect().size()
-        self.draw_something(pixmap)
+        # self.draw_something(pixmap)
 
     @staticmethod
     def __clear_tmp_folder():
@@ -60,23 +61,19 @@ class PDFAppWindow(QMainWindow, Ui_MainWindow):
         if self.count-1 < 1:
             self.prev_page.setEnabled(False)
 
-    def draw_something(self, pix):
-        painter = QPainter(self.view_page.pixmap())
-        painter.drawPixmap(self.rect(), pix)
-        pen = QPen(Qt.red, 3)
-        painter.setPen(pen)
-        painter.drawRect(100, 100, 100, 100)
-        # painter.drawRect(QRect(self.begin, self.end))
-        painter.end()
+    def drawPoints(self, pos):
+        print("Call draw points")
+        pen = Qt.QPen(Qt.Qt.black, 10)
+        qp = Qt.QPainter()
+        qp.begin(self.image.pixmap())
+        qp.setPen(pen)
+        qp.drawPoint(pos.x(), pos.y())
+        self.image.update()
 
-    def mousePressEvent(self, event):
-        pass
-
-    def mouseMoveEvent(self, event):
-        pass
-
-    def mouseReleaseEvent(self, event):
-        pass
+    def get_pos(self, event):
+        X = event.pos().x()
+        y = event.pos().y()
+        self.drawPoints(event.pos())
 
 
 def main():
