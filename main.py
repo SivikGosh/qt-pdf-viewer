@@ -1,13 +1,14 @@
-import sys
-from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication, QLabel
 import os
-from PyQt5.QtCore import Qt, QPoint, QRect
+import sys
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPainter, QPen, QPixmap
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow
+from pdf2image import convert_from_path
+from pdf2image.exceptions import PDFPageCountError
 
 from design import Ui_MainWindow
-from pdf2image import convert_from_path
-from PyQt5.QtGui import QPixmap, QPainter, QPen
-from pdf2image.exceptions import PDFPageCountError
-from PyQt5.QtCore import Qt
+
 
 class PDFAppWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
