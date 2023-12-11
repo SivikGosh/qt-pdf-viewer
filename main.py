@@ -7,7 +7,7 @@ from design import Ui_MainWindow
 from pdf2image import convert_from_path
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from pdf2image.exceptions import PDFPageCountError
-
+from PyQt5.QtCore import Qt
 
 class PDFAppWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
