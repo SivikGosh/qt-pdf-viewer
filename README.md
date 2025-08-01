@@ -12,8 +12,8 @@ Desktop application for view PDF files.
 ### Install and use
 Clone the repo and enter into the root folder
 ```bash
-git clone git@github.com:SivikGosh/test_nvi_solutions.git
-cd test_nvi_solutions/
+git clone git@github.com:SivikGosh/qt-pdf-viewer.git
+cd qt-pdf-viewer/
 ```
 
 Create an environment
