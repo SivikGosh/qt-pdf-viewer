@@ -7,7 +7,7 @@ include = ["src"]
 
 [project]
 name = "pdf_viewer"
-version = "1.0.1"
+version = "1.0.2"
 description = "Desktop application for view PDF files."
 requires-python = ">=3.13"
 dependencies = [
